@@ -1,17 +1,20 @@
 {
   "name": "pi-todo",
-  "version": "1.2.0",
-  "description": "Persistent per-project todo tracker with live TUI widget for Pi",
+  "version": "1.2.1",
+  "description": "Persistent per-project todo tracker with live TUI widget for Pi (fork: completed tasks are hidden from the widget)",
   "author": "mrg2400xx",
+  "contributors": [
+    "rodrigoabel"
+  ],
   "license": "MIT",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mrg2400xx/pi-todo.git"
+    "url": "git+https://github.com/rodrigoabel/pi-todo.git"
   },
-  "homepage": "https://github.com/mrg2400xx/pi-todo#readme",
+  "homepage": "https://github.com/rodrigoabel/pi-todo#readme",
   "bugs": {
-    "url": "https://github.com/mrg2400xx/pi-todo/issues"
+    "url": "https://github.com/rodrigoabel/pi-todo/issues"
   },
   "keywords": [
     "pi-package",
@@ -31,7 +34,12 @@
       "./src/index.ts"
     ]
   },
-  "dependencies": {
-    "typebox": "^1.1.24"
+  "peerDependencies": {
+    "typebox": "*"
+  },
+  "peerDependenciesMeta": {
+    "typebox": {
+      "optional": true
+    }
   }
 }

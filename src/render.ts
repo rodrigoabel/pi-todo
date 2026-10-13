@@ -107,18 +107,28 @@ function truncate(text: string, maxWidth: number): string {
 	return text.slice(0, maxWidth - 1) + "…";
 }
 
-/** Build the widget content lines for the todo list */
+/**
+ * Items the live widget should show: everything except completed tasks.
+ * Completed tasks stay in the store and in tool results, they just stop
+ * occupying rows in the widget box.
+ */
+export function visibleItems(items: TodoItem[]): TodoItem[] {
+	return items.filter((i) => i.status !== "done");
+}
+
+/** Build the widget content lines for the todo list (completed items are omitted) */
 export function buildWidgetLines(items: TodoItem[], theme: Theme, width: number): string[] {
-	if (items.length === 0) return [];
+	const visible = visibleItems(items);
+	if (visible.length === 0) return [];
 
 	const lines: string[] = [];
-	const header = `${theme.fg("accent", theme.bold("TODO"))} ${theme.fg("dim", `· ${items.length} task${items.length === 1 ? "" : "s"}`)}`;
+	const header = `${theme.fg("accent", theme.bold("TODO"))} ${theme.fg("dim", `· ${visible.length} task${visible.length === 1 ? "" : "s"}`)}`;
 	lines.push(truncate(header, width));
 
-	const pending = items.filter((i) => i.status === "pending").length;
-	const inProgress = items.filter((i) => i.status === "in-progress").length;
-	const done = items.filter((i) => i.status === "done").length;
-	const blocked = items.filter((i) => i.status === "blocked").length;
+	const pending = visible.filter((i) => i.status === "pending").length;
+	const inProgress = visible.filter((i) => i.status === "in-progress").length;
+	const done = items.length - visible.length;
+	const blocked = visible.filter((i) => i.status === "blocked").length;
 
 	const parts: string[] = [];
 	if (pending > 0) parts.push(`${pending} pending`);
@@ -129,9 +139,9 @@ export function buildWidgetLines(items: TodoItem[], theme: Theme, width: number)
 		lines.push(truncate(`  ${theme.fg("dim", parts.join(" · "))}`, width));
 	}
 
-	const maxItems = Math.min(items.length, 8);
+	const maxItems = Math.min(visible.length, 8);
 	for (let i = 0; i < maxItems; i++) {
-		const item = items[i]!;
+		const item = visible[i]!;
 		const icon = STATUS_ICON[item.status];
 		const priColor = PRIORITY_COLOR[item.priority] ?? "dim";
 		const priLabel = PRIORITY_LABEL[item.priority] ?? "MED";
@@ -143,16 +153,29 @@ export function buildWidgetLines(items: TodoItem[], theme: Theme, width: number)
 		);
 	}
 
-	if (items.length > maxItems) {
-		lines.push(truncate(`  ${theme.fg("dim", `… and ${items.length - maxItems} more`)}`, width));
+	if (visible.length > maxItems) {
+		lines.push(truncate(`  ${theme.fg("dim", `… and ${visible.length - maxItems} more`)}`, width));
 	}
 
 	return lines;
 }
 
+/**
+ * Compact one-line state used when every task is completed: the box and its rows
+ * disappear and only this line remains.
+ */
+export function allDoneLine(items: TodoItem[], theme: Theme): string {
+	const n = items.length;
+	return `${theme.fg("accent", theme.bold("TODO"))} ${theme.fg("success", "✓")} ${theme.fg("dim", `${n} done`)}`;
+}
+
 /** Create the widget component factory for setWidget() */
 export function createWidgetComponent(items: TodoItem[]): (tui: unknown, theme: Theme) => Component {
 	return (_tui: unknown, theme: Theme) => {
+		// Nothing active left: collapse the whole box into a single line.
+		if (visibleItems(items).length === 0) {
+			return new Text(allDoneLine(items, theme), 1, 0);
+		}
 		const width = process.stdout.columns || 120;
 		const lines = buildWidgetLines(items, theme, width);
 		const box = new BorderedBox((text: string) => theme.fg("success", text));

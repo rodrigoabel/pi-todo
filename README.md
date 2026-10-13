@@ -2,6 +2,12 @@
 
 Persistent per-project todo tracker with a live TUI widget for [Pi](https://github.com/nicobailon/pi-coding-agent).
 
+> **Fork notice** — this is a fork of **pi-todo 1.2.0** by
+> [mrg2400xx](https://github.com/mrg2400xx) (MIT, see [`LICENSE`](LICENSE)).
+> The upstream repository is no longer reachable (404), so this fork is maintained here.
+> Upstream behavior is kept as-is; the only change is how the live widget handles
+> **completed** tasks.
+
 ## What It Does
 
 - Registers a `todo` tool the LLM can call to manage a task list
@@ -9,25 +15,58 @@ Persistent per-project todo tracker with a live TUI widget for [Pi](https://gith
 - Shows a **live widget** above the editor with the current todo state
 - Auto-loads existing todos on session start
 
+## Changes in this fork
+
+**The widget only takes up screen space for work that is still open.**
+
+1. **Completed tasks are no longer rendered as rows.** A task vanishes from the widget as soon as
+   its status becomes `done`. Nothing is deleted: `.pi/todo.json`, `todo list` and tool results still
+   include completed items, and `clear` still removes them.
+2. **The summary line still counts them**, so finished work stays accounted for without costing a
+   row: `1 pending · 1 active · 1 done`.
+3. **When every task is done the box collapses into a single line:**
+
+   ```txt
+   TODO ✓ 3 done
+   ```
+
+   It does not disappear on its own — run `/todo clear` to drop completed items and remove the line.
+
+Two smaller, non-behavioral changes came with the fork:
+
+- `typebox` moved from `dependencies` to `peerDependencies` (with `peerDependenciesMeta.optional`),
+  so Pi's host copy is used instead of a second physical copy of the library.
+- `package.json` metadata points at this repository.
+
+Everything else is upstream 1.2.0, unchanged. The whole fork is
+[one commit on top of the upstream import](https://github.com/rodrigoabel/pi-todo/compare/b4ded78...main)
+touching a single source file, `src/render.ts` (plus docs).
+
 ## Installation
 
-Add the extension path to `~/.pi/agent/settings.json`:
+Install straight from this repository:
+
+```bash
+pi install git:github.com/rodrigoabel/pi-todo
+```
+
+Or clone it and install the local path:
+
+```bash
+git clone https://github.com/rodrigoabel/pi-todo ~/Proyectos/pi-todo
+pi install ~/Proyectos/pi-todo
+```
+
+Or point `~/.pi/agent/settings.json` at the extension file:
 
 ```json
 {
-  "extensions": ["~/.pi/agent/extensions/todo/src/index.ts"]
+  "extensions": ["~/Proyectos/pi-todo/src/index.ts"]
 }
 ```
 
-Or if you already have extensions:
-
-```json
-{
-  "extensions": ["~/.pi/agent/extensions/todo/src/index.ts", "other/extension/path"]
-}
-```
-
-Then restart Pi (or run `/reload`).
+Then restart Pi, or run `/reload`. No build step is needed: Pi loads the TypeScript
+sources directly through its bundled `jiti`.
 
 ## Tool: `todo`
 
@@ -96,21 +135,41 @@ Tasks are stored in `.pi/todo.json` in the project root:
 
 ## Widget
 
-The live widget appears above the editor with a green border and shows:
+The live widget appears above the editor inside a green Unicode box. Only **active**
+tasks (`pending`, `in-progress`, `blocked`) get a row:
 
-```
-┌──────────────────────────────────────────────────┐
-│ TODO · 3 tasks                                    │
-│   2 pending · 1 active                            │
-│   [ ] T-001 [HIGH] Build StorefrontController · Ultron │
-│   [ ] T-002 [MED]  Port landing.html · Maya       │
-│   [•] T-003 [LOW]  Verify storefront routes · Quinn │
-└──────────────────────────────────────────────────┘
+```txt
+┌───────────────────────────────────────────────────┐
+│ TODO · 2 tasks                                     │
+│   1 pending · 1 active · 1 done                    │
+│   [ ] [HIGH] Build StorefrontController · Ultron   │
+│   [•] [LOW] Verify storefront routes · Quinn       │
+└───────────────────────────────────────────────────┘
 ```
 
-Status icons: `[ ]` pending, `[•]` in-progress, `[x]` done, `[!]` blocked
+The `1 done` in the summary line is a task that is already finished: counted, but
+not listed. At most 8 rows are shown; the rest collapse into `… and N more`.
+
+When there is nothing left to display, the box goes away and a single line
+remains:
+
+```txt
+TODO ✓ 3 done
+```
+
+Status icons: `[ ]` pending, `[•]` in-progress, `[x]` done, `[!]` blocked. In this
+fork `[x]` only appears in tool results and `/todo`, never as a widget row.
 
 ## Changelog
+
+### v1.2.1 — this fork
+
+- **Completed tasks no longer take up widget rows.** `done` items are filtered out of the live
+  widget (`visibleItems()` in `src/render.ts`). The store and tool results keep them, so nothing is
+  lost and `clear` behaves as before.
+- **All-done collapse.** When every task is done, the bordered box is replaced by a single line:
+  `TODO ✓ 3 done`.
+- `typebox` declared as an optional peer dependency instead of a bundled dependency.
 
 ### v1.2.0
 
