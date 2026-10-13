@@ -1,11 +1,8 @@
 {
   "name": "pi-todo",
   "version": "1.2.1",
-  "description": "Persistent per-project todo tracker with live TUI widget for Pi (fork: completed tasks are hidden from the widget)",
+  "description": "Persistent per-project todo tracker with live TUI widget for Pi — personal fork of mrg2400xx's pi-todo 1.2.0 that keeps completed tasks out of the widget",
   "author": "mrg2400xx",
-  "contributors": [
-    "rodrigoabel"
-  ],
   "license": "MIT",
   "type": "module",
   "repository": {

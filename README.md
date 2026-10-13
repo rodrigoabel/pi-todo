@@ -2,11 +2,20 @@
 
 Persistent per-project todo tracker with a live TUI widget for [Pi](https://github.com/nicobailon/pi-coding-agent).
 
-> **Fork notice** — this is a fork of **pi-todo 1.2.0** by
-> [mrg2400xx](https://github.com/mrg2400xx) (MIT, see [`LICENSE`](LICENSE)).
-> The upstream repository is no longer reachable (404), so this fork is maintained here.
-> Upstream behavior is kept as-is; the only change is how the live widget handles
-> **completed** tasks.
+## Attribution
+
+**The extension is not mine.** It was written by [mrg2400xx](https://github.com/mrg2400xx) and
+published as `pi-todo@1.2.0` under the MIT license ([`LICENSE`](LICENSE), Copyright (c) 2026
+mrg2400xx). All credit for the design and the implementation goes to them. I am not affiliated with
+them, and I claim no authorship or ownership over this extension.
+
+This repository is a **personal-use fork**, not a new project, not a rewrite and not a maintained
+successor. The upstream repository (`github.com/mrg2400xx/pi-todo`) is no longer reachable (404), so
+this copy exists only to keep **one small tweak** I wanted for my own setup somewhere I can install
+it from. Everything outside that tweak is upstream 1.2.0, verbatim.
+
+If you don't need the tweak, use the original project or the npm package `pi-todo` instead of this
+fork.
 
 ## What It Does
 
@@ -15,7 +24,9 @@ Persistent per-project todo tracker with a live TUI widget for [Pi](https://gith
 - Shows a **live widget** above the editor with the current todo state
 - Auto-loads existing todos on session start
 
-## Changes in this fork
+## The one change in this fork
+
+Only `src/render.ts` behaves differently, and only in the live widget:
 
 **The widget only takes up screen space for work that is still open.**
 
@@ -32,15 +43,16 @@ Persistent per-project todo tracker with a live TUI widget for [Pi](https://gith
 
    It does not disappear on its own — run `/todo clear` to drop completed items and remove the line.
 
-Two smaller, non-behavioral changes came with the fork:
+Two packaging-only changes, no behavior involved:
 
 - `typebox` moved from `dependencies` to `peerDependencies` (with `peerDependenciesMeta.optional`),
   so Pi's host copy is used instead of a second physical copy of the library.
 - `package.json` metadata points at this repository.
 
-Everything else is upstream 1.2.0, unchanged. The whole fork is
-[one commit on top of the upstream import](https://github.com/rodrigoabel/pi-todo/compare/b4ded78...main)
-touching a single source file, `src/render.ts` (plus docs).
+Everything else is upstream 1.2.0, unchanged. The tweak is
+[one commit on top of the verbatim upstream import](https://github.com/rodrigoabel/pi-todo/compare/b4ded78...main),
+touching a single source file, `src/render.ts` (plus docs). It is a personal tweak, not an upstream
+release.
 
 ## Installation
 
@@ -162,7 +174,7 @@ fork `[x]` only appears in tool results and `/todo`, never as a widget row.
 
 ## Changelog
 
-### v1.2.1 — this fork
+### v1.2.1 — personal tweak, not an upstream release
 
 - **Completed tasks no longer take up widget rows.** `done` items are filtered out of the live
   widget (`visibleItems()` in `src/render.ts`). The store and tool results keep them, so nothing is
